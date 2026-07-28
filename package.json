@@ -2,9 +2,10 @@
   "name": "chaibackened",
   "version": "1.0.0",
   "description": "a basic app to deploy",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "dev": "nodemon src/index.js"
   },
   "keywords": [
     "node",
@@ -16,5 +17,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
 }
