@@ -13,4 +13,11 @@ app.use(express.urlencoded({extended:true,limit:"16kb"})); // get data from url
 app.use(express.static("public")); // able to show data publiclly
 app.use(cookieParser()); //taking user cookies and also configure that
 
+//routes import 
+import userRouter from "./routes/user.routes.js";
+
+//routes declarition
+app.use("/api/v1/users",userRouter);
+
+
 export {app};
