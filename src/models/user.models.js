@@ -2,8 +2,6 @@ import mongoose, {Schema} from 'mongoose';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
-
-
 const userSchema = new Schema(
     {
         username: {
@@ -50,14 +48,14 @@ const userSchema = new Schema(
     },{timestamps:true}
 )
 
-userSchema.pre("save",async function(next){
-    if(!this.isModified("password"))return next();
+userSchema.pre("save",async function(){ // don't use next when you have verions of mongoose is 8 or greter than it 
+    if(!this.isModified("password"))return ;
     this.password= await bcrypt.hash(this.password,10);
-    // next(); we are using next when it is mongoose 7 version or less than it . 
+    // next(); we are using next when it is mongoose 7 version or less than it .when using next also give peramertr in function 
 });
 
 userSchema.methods.isPasswordCorrect=async function(password){
-     return await bcrypt.compare(password,this.password);
+    return await bcrypt.compare(password,this.password);
 }
 
 userSchema.methods.generateAccessToken=function(){
