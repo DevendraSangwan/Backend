@@ -25,18 +25,34 @@ router.route("/logout").post(verifyJWT,logoutUser)
 
 router.route("/refresh-token").post(refreshAccessToken)
 
-router.route("/change-password").post(verifyJWT,changeCurrentPassword)
-
 router.route("/current-user").get(verifyJWT,getCurrentUser)
 
-router.route("/update-account").patch(verifyJWT,updateAccountDetails)
+router.route("/change-password").post(verifyJWT,changeCurrentPassword)
 
-router.route("/avatar").patch(verifyJWT,upload.single("avatar"),updateUserAvatar)
-
-router.route("/coverImage").patch(verifyJWT,upload.single("coverImage"),updateUserCoverImage)
+router.route("/history").get(verifyJWT,getWatchHistory)
 
 router.route("/c/:username").get(verifyJWT,getUserChannelProfile)
 
-router.route("/history").get(verifyJWT,getWatchHistory)
+router.route("/update-account").patch(verifyJWT,updateAccountDetails)
+
+router.route("/avatar").patch(verifyJWT,
+    upload.any(),
+    (req,res)=>{
+        // console.log("Files:",req.files);
+        return res.status(200).json({
+            files:req.files
+        });
+    }
+    )
+
+router.route("/coverImage").patch(verifyJWT,
+    upload.any(),
+    (req,res)=>{
+        // console.log("Files:",req.files);
+        return res.status(200).json({
+            files:req.files
+        });
+    }
+    )
 
 export default router;

@@ -4,6 +4,8 @@ import {User} from '../models/user.models.js';
 import uploadOnCloundinary from '../utils/cloudinary.js';
 import {ApiResponse} from '../utils/ApiResponse.js';
 import jwt from "jsonwebtoken"
+import mongoose from 'mongoose';
+import fs from "fs";
 
 const generateAccessAndRefreshTokens=async(userId)=>{
 try{
@@ -144,8 +146,9 @@ const logoutUser=asyncHandler(async(req,res)=>{
   //step-1 
   await User.findByIdAndUpdate(req.user._id,
     {
-      $set:{
-            refreshToken:undefined}
+      $unset:{
+            refreshToken:1//this remove the feild from document
+          } 
     },{new:true}) 
 
 const options={
@@ -235,7 +238,7 @@ const updateAccountDetails=asyncHandler(async(req,res)=>{
   if(!fullName || !email){
     throw new ApiError(400,"All feilds are required ")
   }
-  const user=await User.findById(req.user?._id,{
+  const user=await User.findByIdAndUpdate(req.user?._id,{
     $set:{
       fullName,
       email:email
@@ -256,6 +259,7 @@ const updateUserAvatar=asyncHandler(async(req,res)=>{
   if(!avatar.url){
     throw new ApiError(400,"Error while uploading on avatar")
   }
+  fs.unlinkSync(avatarLocalPath);
   const user=await User.findByIdAndUpdate(req.user?._id,{
     $set:{
       avatar:avatar.url
@@ -273,10 +277,13 @@ const updateUserCoverImage=asyncHandler(async(req,res)=>{
   if(!coverImageLocalPath){
     throw new ApiError(400,"cover Image file is missing")
   }
+  
   const coverImage=await uploadOnCloundinary(coverImageLocalPath)
   if(!coverImage.url){
     throw new ApiError(400,"Error while uploading on cover Image")
   }
+  fs.unlinkSync(coverImageLocalPath);
+
   const user=await User.findByIdAndUpdate(req.user?._id,{
     $set:{
       coverImage:coverImage.url
@@ -326,10 +333,12 @@ const getUserChannelProfile=asyncHandler(async(req,res)=>{
         },
         isSubscribed:{
           $cond:{
-            if:{$in:[req.user?._id,"$subscribers.subscriber"],
+            if:{
+              $in:[
+                req.user?._id,"$subscribers.subscriber"],
+              },
               then:true,
               else:false,
-            }
           }
         }
       }
@@ -397,9 +406,19 @@ const getWatchHistory=asyncHandler(async(req,res)=>{
       }
     },
   ])
-  return req
+  return res
   .status(200)
   .json(new ApiResponse(200, user[0].watchHistory),"watchHistory fetched successfully.")
 })
 
-export {registerUser,loginUser,logoutUser,refreshAccessToken,changeCurrentPassword,getCurrentUser,updateAccountDetails,updateUserAvatar,updateUserCoverImage,getUserChannelProfile,getWatchHistory};
+export {registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  changeCurrentPassword,
+  getCurrentUser,
+  updateAccountDetails,
+  updateUserAvatar,
+  updateUserCoverImage,
+  getUserChannelProfile,
+  getWatchHistory};
